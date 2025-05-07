@@ -1,11 +1,35 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:local_storage/db_helper.dart';
+import 'package:local_storage/task_model.dart';
 
-AndroidOptions _getAndroidOptions() => const AndroidOptions(
-      encryptedSharedPreferences: true,
-    );
-final storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  DbHelper dbHelper = DbHelper();
+  TaskModel taskModel1 = TaskModel(
+    title: "task 1",
+    isCompleted: false,
+    date: "2025-05-7",
+  );
+
+  TaskModel taskModel2 = TaskModel(
+    title: "task 2",
+    isCompleted: false,
+    date: "2025-05-7",
+  );
+  TaskModel taskModel3 = TaskModel(
+    title: "task 3",
+    isCompleted: false,
+    date: "2025-05-7",
+  );
+  dbHelper.insertTask(taskModel1);
+  dbHelper.insertTask(taskModel2);
+  dbHelper.insertTask(taskModel3);
+  List<TaskModel> tasks = await dbHelper.getTasks();
+
+  tasks.forEach((oneTask) {
+    log(oneTask.toMap().toString());
+  });
   runApp(const MyApp());
 }
 
@@ -38,37 +62,37 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   String name = "";
 
-  saveUserName() {
-    storage.write(key: 'username', value: 'Abdelrahman Badawi');
-  }
+  // saveUserName() {
+  //   storage.write(key: 'username', value: 'Abdelrahman Badawi');
+  // }
 
-  getUserName() async {
-    name = await storage.read(key: 'username') ?? 'No name is saved right now';
-    setState(() {});
-  }
+  // getUserName() async {
+  //   name = await storage.read(key: 'username') ?? 'No name is saved right now';
+  //   setState(() {});
+  // }
 
-  saveCounterToLoacalStorage() {
-    storage.write(key: 'counter', value: _counter.toString());
-  }
+  // saveCounterToLoacalStorage() {
+  //   storage.write(key: 'counter', value: _counter.toString());
+  // }
 
-  getCounterValue() async {
-    String value = await storage.read(key: 'counter') ?? "0";
-    _counter = int.parse(value);
-    setState(() {});
-  }
+  // getCounterValue() async {
+  //   String value = await storage.read(key: 'counter') ?? "0";
+  //   _counter = int.parse(value);
+  //   setState(() {});
+  // }
 
   void _incrementCounter() {
     setState(() {
       _counter++;
-      saveCounterToLoacalStorage();
+      //saveCounterToLoacalStorage();
     });
   }
 
   @override
   void initState() {
-    saveUserName();
-    getUserName();
-    getCounterValue();
+    // saveUserName();
+    // getUserName();
+    // getCounterValue();
     super.initState();
   }
 
