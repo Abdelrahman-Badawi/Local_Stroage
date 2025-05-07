@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-SharedPreferences? prefs;
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  prefs = await SharedPreferences.getInstance();
+AndroidOptions _getAndroidOptions() => const AndroidOptions(
+      encryptedSharedPreferences: true,
+    );
+final storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
+void main() {
   runApp(const MyApp());
 }
 
@@ -20,13 +20,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Tasbihaa'),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
+
   final String title;
 
   @override
@@ -35,35 +36,39 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String name = "";
 
-  // String value = "";
-  // setMyData() async {
-  //   prefs!.setString('MyName', 'Abdelrahman Badawi');
-  // }
+  saveUserName() {
+    storage.write(key: 'username', value: 'Abdelrahman Badawi');
+  }
 
-  // getData() {
-  //   String myName = prefs!.getString('MyName') ?? 'No Data is set yet';
-  //   value = myName;
-  //   setState(() {});
-  // }
+  getUserName() async {
+    name = await storage.read(key: 'username') ?? 'No name is saved right now';
+    setState(() {});
+  }
+
+  saveCounterToLoacalStorage() {
+    storage.write(key: 'counter', value: _counter.toString());
+  }
+
+  getCounterValue() async {
+    String value = await storage.read(key: 'counter') ?? "0";
+    _counter = int.parse(value);
+    setState(() {});
+  }
 
   void _incrementCounter() {
     setState(() {
       _counter++;
-      prefs!.setInt('counter', _counter);
-    });
-  }
-
-  getInitialCounter() async {
-    setState(() {
-      _counter = prefs!.getInt('counter') ?? 0;
+      saveCounterToLoacalStorage();
     });
   }
 
   @override
   void initState() {
-    //setMyData();
-    getInitialCounter();
+    saveUserName();
+    getUserName();
+    getCounterValue();
     super.initState();
   }
 
@@ -78,73 +83,21 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const SizedBox(
-              width: 300,
-              child: Text(
-                'سبحان الله و الحمد لله و لا إله إلا الله',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
-              ),
+            Text(
+              name,
             ),
-            const SizedBox(
-              height: 20,
-            ),
-            const Divider(),
-            Container(
-              margin: const EdgeInsets.all(8),
-              padding: const EdgeInsets.all(8),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                        offset: const Offset(0, 3))
-                  ]),
-              child: Text(
-                '$_counter',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-            ),
-            const Divider(),
-            const SizedBox(
-              height: 20,
-            ),
-            ElevatedButton(
-                onPressed: _incrementCounter,
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    foregroundColor: Colors.white,
-                    fixedSize: const Size(250, 50)),
-                child: const Icon(
-                  Icons.add,
-                  size: 40,
-                )),
-            const SizedBox(
-              height: 20,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _counter = 0;
-                  prefs!.setInt('counter', _counter);
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal.withOpacity(0.3),
-                  foregroundColor: Colors.white,
-                  fixedSize: const Size(250, 50)),
-              child: const Icon(
-                Icons.exposure_zero,
-                size: 40,
-              ),
+            Text(
+              '$_counter',
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
